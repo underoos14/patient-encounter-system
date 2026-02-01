@@ -103,8 +103,9 @@ def create_appointment(
     apt = models.Appointment(
         patient_id=payload.patient_id,
         doctor_id=payload.doctor_id,
+        reason=payload.reason,
         apt_start=start_time_utc,
-        duration_mins=payload.apt_duration,
+        apt_duration=payload.apt_duration,
     )
 
     db.add(apt)
