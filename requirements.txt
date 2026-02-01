@@ -12,3 +12,4 @@ bandit
 pylint
 pyjwt
 bcrypt
+httpx
