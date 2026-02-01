@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+alembic
+mysqlclient
+pydantic
+pymysql
+pytest
+pytest-mock
+pytest-cov
+bandit
+pylint
+pyjwt
+bcrypt

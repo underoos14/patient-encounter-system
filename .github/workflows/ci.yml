@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e
+          pip install -r requirements.txt
 
       - name: Run pylint (≥ 5.0)
         run: pylint src/patient_encounter_systemm --fail-under=5.0
