@@ -23,8 +23,8 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run pylint (≥ 5.0)
-        run: pylint src/patient_encounter_systemm --fail-under=5.0
+      - name: Run pylint (≥ 8.0)
+        run: pylint src/patient_encounter_systemm --fail-under=8.0
 
       - name: Security scan
         run: bandit -r src/patient_encounter_systemm -ll
