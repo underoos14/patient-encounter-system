@@ -69,28 +69,6 @@ def test_create_appointment(db_session):
     assert result.apt_duration == 30
 
 
-# def test_appointment_invalid_duration(db_session):
-#     patient = Patient(
-#         first_name="Ramesh",
-#         last_name="Kumar",
-#         email="rameshkumar@gmail.com",
-#         phone="9876543210",
-#     )
-#     doctor = Doctor(name="Dr. Anjali Rao", specialty="Cardiology", active_status=True)
-
-#     appointment = Appointment(
-#         reason="Test",
-#         patient=patient,
-#         doctor=doctor,
-#         apt_start=datetime(2026, 2, 1, 10, 0, tzinfo=timezone.utc),
-#         apt_duration=-10,
-#     )
-
-#     db_session.add(appointment)
-#     with pytest.raises(Exception) as exc:
-#         db_session.commit()
-
-
 def test_get_patient_by_id_success(db_session):
     patient = Patient(
         first_name="Ramesh",
