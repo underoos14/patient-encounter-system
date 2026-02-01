@@ -21,7 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pytest pytest-cov pylint bandit pip-audit build
+          pip install -e
 
       - name: Run pylint (≥ 5.0)
         run: pylint src/patient_encounter_systemm --fail-under=5.0
