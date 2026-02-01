@@ -1,0 +1,39 @@
+name: Python CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install pytest pytest-cov pylint bandit pip-audit build
+
+      - name: Run pylint (≥ 5.0)
+        run: pylint src/oop_bank_account --fail-under=5.0
+
+      - name: Run tests with coverage
+        run: pytest
+
+      - name: Security scan
+        run: bandit -r src/oop_bank_account -ll
+
+      - name: Dependency audit
+        run: pip-audit
+
+      - name: Build wheel
+        run: python -m build
