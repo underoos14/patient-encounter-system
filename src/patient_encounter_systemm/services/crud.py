@@ -1,12 +1,13 @@
+from datetime import datetime, timedelta, timezone, date
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, select, func
 from fastapi import HTTPException
 from patient_encounter_systemm.schemas import schemas
 from patient_encounter_systemm.models import models
-from datetime import datetime, timedelta, timezone, date
 
 
 def get_patient_by_id(db: Session, patient_id: int) -> models.Patient:
+    """database operation to get patient by id"""
     patient = db.get(models.Patient, patient_id)
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -14,6 +15,7 @@ def get_patient_by_id(db: Session, patient_id: int) -> models.Patient:
 
 
 def get_doctor_by_id(db: Session, doctor_id: int) -> models.Doctor:
+    """database operation to get doctor by id"""
     doctor = db.get(models.Doctor, doctor_id)
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
@@ -23,6 +25,7 @@ def get_doctor_by_id(db: Session, doctor_id: int) -> models.Doctor:
 def get_appointment_with_date(
     db: Session, apt_date: date, doctor_id: int | None = None
 ):
+    """database operation to get valid appointment with date and doctor id"""
     start = datetime.combine(apt_date, datetime.min.time(), tzinfo=timezone.utc)
     end = datetime.combine(apt_date, datetime.max.time(), tzinfo=timezone.utc)
 
@@ -37,6 +40,7 @@ def get_appointment_with_date(
 
 
 def create_patient(db: Session, payload: schemas.PatientCreate) -> models.Patient:
+    """database operation to create patient profile"""
     try:
         patient = models.Patient(**payload.model_dump())
         db.add(patient)
@@ -49,6 +53,7 @@ def create_patient(db: Session, payload: schemas.PatientCreate) -> models.Patien
 
 
 def create_doctor(db: Session, payload: schemas.DoctorCreate) -> models.Doctor:
+    """database operation to create doctor fields"""
     try:
         doctor = models.Doctor(**payload.model_dump())
         db.add(doctor)
@@ -62,6 +67,7 @@ def create_doctor(db: Session, payload: schemas.DoctorCreate) -> models.Doctor:
 def create_appointment(
     db: Session, payload: schemas.AppointmentCreate
 ) -> models.Appointment:
+    """database operation to create valid appointment"""
     start_time_utc = payload.apt_start.astimezone(timezone.utc)
     end_time_utc = start_time_utc + timedelta(minutes=payload.apt_duration)
 
