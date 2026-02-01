@@ -24,13 +24,13 @@ jobs:
           pip install pytest pytest-cov pylint bandit pip-audit build
 
       - name: Run pylint (≥ 5.0)
-        run: pylint src/oop_bank_account --fail-under=5.0
+        run: pylint src/patient_encounter_systemm --fail-under=5.0
 
       - name: Run tests with coverage
         run: pytest
 
       - name: Security scan
-        run: bandit -r src/oop_bank_account -ll
+        run: bandit -r src/patient_encounter_systemm -ll
 
       - name: Dependency audit
         run: pip-audit
