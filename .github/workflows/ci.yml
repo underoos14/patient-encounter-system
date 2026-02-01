@@ -26,14 +26,11 @@ jobs:
       - name: Run pylint (≥ 5.0)
         run: pylint src/patient_encounter_systemm --fail-under=5.0
 
-      - name: Run tests with coverage
-        run: pytest
-
       - name: Security scan
         run: bandit -r src/patient_encounter_systemm -ll
 
+      - name: Run tests with coverage
+        run: pytest
+
       - name: Dependency audit
         run: pip-audit
-
-      - name: Build wheel
-        run: python -m build
