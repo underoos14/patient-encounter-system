@@ -23,8 +23,13 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run pylint (≥ 8.0)
-        run: pylint src/patient_encounter_systemm --fail-under=8.0
+      - name: Run Ruff
+        run: |
+          poetry run ruff check src
+
+      - name: Run Black
+        run: |
+          poetry run black --check src
 
       - name: Security scan
         run: bandit -r src/patient_encounter_systemm -ll

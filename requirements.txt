@@ -13,3 +13,6 @@ pylint
 pyjwt
 bcrypt
 httpx
+pip-audit
+ruff
+black
