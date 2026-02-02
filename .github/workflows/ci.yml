@@ -25,11 +25,11 @@ jobs:
 
       - name: Run Ruff
         run: |
-          poetry run ruff check src
+          ruff check src
 
       - name: Run Black
         run: |
-          poetry run black --check src
+          black --check src
 
       - name: Security scan
         run: bandit -r src/patient_encounter_systemm -ll
