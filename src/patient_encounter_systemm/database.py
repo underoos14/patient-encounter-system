@@ -5,9 +5,9 @@ DATABASE SETUP FILE
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-
+URL = "mysql+pymysql://mongouhd_evernorth:U*dgQkKRuEHe@cp-15.webhostbox.net/mongouhd_evernorth?charset=utf8mb4"
 engine = create_engine(
-    "mysql+pymysql://mongouhd_evernorth:U*dgQkKRuEHe@cp-15.webhostbox.net/mongouhd_evernorth?charset=utf8mb4",
+    URL,
     echo=True,
 )
 
