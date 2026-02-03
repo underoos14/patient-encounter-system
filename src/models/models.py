@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import String, Integer, DateTime, Boolean, ForeignKey, Index, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from patient_encounter_systemm.database import Base
+from database import Base
 
 
 class Patient(Base):

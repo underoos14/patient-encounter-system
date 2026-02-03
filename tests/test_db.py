@@ -2,9 +2,9 @@ from datetime import datetime, timezone, date, timedelta
 import pytest
 from sqlalchemy import select
 from fastapi import HTTPException
-from patient_encounter_systemm.models.models import Patient, Doctor, Appointment
-from patient_encounter_systemm.services import crud
-from patient_encounter_systemm.schemas import schemas
+from src.models.models import Patient, Doctor, Appointment
+from src.services import crud
+from src.schemas import schemas
 
 
 def test_create_patient(db_session):

@@ -1,9 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
 from datetime import datetime, timezone
-from patient_encounter_systemm.main import app
-from patient_encounter_systemm.schemas import schemas
+from src.main import app
+from src.schemas import schemas
 
 
 @pytest.fixture
@@ -16,7 +15,7 @@ def client():
 @pytest.fixture
 def mock_create_patient(mocker):
     return mocker.patch(
-        "patient_encounter_systemm.services.crud.create_patient",
+        "services.crud.create_patient",
         return_value=schemas.PatientCreate(
             first_name="John",
             last_name="Doe",
@@ -29,7 +28,7 @@ def mock_create_patient(mocker):
 @pytest.fixture
 def mock_get_patient_by_id(mocker):
     return mocker.patch(
-        "patient_encounter_systemm.services.crud.get_patient_by_id",
+        "services.crud.get_patient_by_id",
         return_value=schemas.PatientRead(
             pat_id=1,
             first_name="John",
@@ -45,7 +44,7 @@ def mock_get_patient_by_id(mocker):
 @pytest.fixture
 def mock_create_doctor(mocker):
     return mocker.patch(
-        "patient_encounter_systemm.services.crud.create_doctor",
+        "services.crud.create_doctor",
         return_value=schemas.DoctorCreate(
             name="Dr. Smith", specialty="Cardiology", reason="Consultation", active=True
         ),
@@ -55,7 +54,7 @@ def mock_create_doctor(mocker):
 @pytest.fixture
 def mock_get_doctor_by_id(mocker):
     return mocker.patch(
-        "patient_encounter_systemm.services.crud.get_doctor_by_id",
+        "services.crud.get_doctor_by_id",
         return_value=schemas.DoctorRead(
             doc_id=1,
             name="Dr. Smith",
@@ -69,7 +68,7 @@ def mock_get_doctor_by_id(mocker):
 @pytest.fixture
 def mock_get_appointments(mocker):
     return mocker.patch(
-        "patient_encounter_systemm.services.crud.get_appointment_with_date",
+        "services.crud.get_appointment_with_date",
         return_value=[
             schemas.AppointmentRead(
                 apt_id=1,

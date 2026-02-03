@@ -2,10 +2,10 @@ from datetime import date
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 
-from patient_encounter_systemm.database import engine, get_db
-from patient_encounter_systemm.models import models
-from patient_encounter_systemm.schemas import schemas
-from patient_encounter_systemm.services import crud
+from database import engine, get_db
+from models import models
+from schemas import schemas
+from services import crud
 
 models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Patient Encounter System")

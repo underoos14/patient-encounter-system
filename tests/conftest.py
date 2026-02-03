@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
-from patient_encounter_systemm.database import Base
+from src.database import Base
 
 TEST_DATABASE_URL = "sqlite+pysqlite:///:memory:"
 

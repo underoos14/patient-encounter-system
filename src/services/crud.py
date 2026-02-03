@@ -2,8 +2,8 @@ from datetime import datetime, timedelta, timezone, date
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, select, func
 from fastapi import HTTPException
-from patient_encounter_systemm.schemas import schemas
-from patient_encounter_systemm.models import models
+from schemas import schemas
+from models import models
 
 
 def get_patient_by_id(db: Session, patient_id: int) -> models.Patient:
