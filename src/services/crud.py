@@ -68,10 +68,10 @@ def create_appointment(
     db: Session, payload: schemas.AppointmentCreate
 ) -> models.Appointment:
     """database operation to create valid appointment"""
-    start_time_utc = payload.apt_start.astimezone(timezone.utc)
-    end_time_utc = start_time_utc + timedelta(minutes=payload.apt_duration)
+    start_time = payload.apt_start.astimezone(timezone.utc)
+    end_time = start_time + timedelta(minutes=payload.apt_duration)
 
-    if start_time_utc <= datetime.now(timezone.utc):
+    if start_time <= datetime.now(timezone.utc):
         raise HTTPException(
             status_code=400, detail="Appointments must be scheduled at a later time"
         )
@@ -82,20 +82,20 @@ def create_appointment(
             status_code=400, detail="Doctor is inactive or doesn't exist"
         )
 
-    conflict_stmt = select(models.Appointment).where(
+    overlap_stmt = select(models.Appointment).where(
         and_(
             models.Appointment.doctor_id == payload.doctor_id,
-            models.Appointment.apt_start < end_time_utc,
+            models.Appointment.apt_start < end_time,
             func.date_add(
                 models.Appointment.apt_start,
                 func.interval(models.Appointment.apt_duration, "MINUTE"),
             )
-            > start_time_utc,
+            > start_time,
         )
     )
-
-    conflict = db.execute(conflict_stmt).scalars().first()
-    if conflict:
+    print(f"Overlap query: {overlap_stmt}")
+    overlap = db.execute(overlap_stmt).scalars().first()
+    if overlap:
         raise HTTPException(
             status_code=409, detail="Doctor has a conflicting appointment"
         )
@@ -104,7 +104,7 @@ def create_appointment(
         patient_id=payload.patient_id,
         doctor_id=payload.doctor_id,
         reason=payload.reason,
-        apt_start=start_time_utc,
+        apt_start=start_time,
         apt_duration=payload.apt_duration,
     )
 

@@ -1,80 +1,57 @@
 # import pytest
-# from sqlalchemy import create_engine
-# from sqlalchemy.orm import sessionmaker, Session
+# from fastapi.testclient import TestClient
 
-# from src.database import Base
-
-# print("Test file: ", id(Base))
-
-# TEST_DATABASE_URL = "sqlite+pysqlite:///:memory:"
-
-
-# @pytest.fixture(scope="function")
-# def db_session():
-#     engine = create_engine(
-#         TEST_DATABASE_URL,
-#         connect_args={"check_same_thread": False},
-#     )
-
-#     Base.metadata.create_all(bind=engine)
-
-#     SessionLocal = sessionmaker(bind=engine)
-#     session = SessionLocal()
-
-#     try:
-#         yield session
-#     finally:
-#         session.close()
-#         Base.metadata.drop_all(bind=engine)
-
-
-# @pytest.fixture(scope="session", autouse=True)
-# def block_prod_db(mocker):
-#     mocker.patch(
-#         "src.database.create_engine",
-#         side_effect=RuntimeError("❌ Prod database access attempted during tests"),
-#     )
+# from src.main import app
+# from src.database import get_db
 
 
 # @pytest.fixture
-# def disable_sqlite_conflict_check(mocker):
+# def mock_db(mocker):
 #     """
-#     SQLite does not support INTERVAL / DATE_ADD.
-#     This fixture bypasses the conflict check query only.
+#     Fully mocked SQLAlchemy Session.
 #     """
-#     original_execute = Session.execute
+#     db = mocker.Mock(name="Session")
 
-#     def patched_execute(self, statement, *args, **kwargs):
-#         sql = str(statement).lower()
-#         if "interval" in sql or "date_add" in sql:
+#     db.execute.side_effect = AssertionError("DB access detected")
+#     db.commit.side_effect = AssertionError("DB access detected")
+#     db.refresh.side_effect = AssertionError("DB access detected")
+#     db.add.side_effect = AssertionError("DB access detected")
 
-#             class DummyResult:
-#                 def scalars(self):
-#                     return self
+#     return db
 
-#                 def first(self):
-#                     return None
 
-#             return DummyResult()
-#         return original_execute(self, statement, *args, **kwargs)
+# @pytest.fixture
+# def client(mock_db):
+#     """
+#     TestClient created ONLY after dependency override is applied.
+#     """
 
-#     mocker.patch.object(Session, "execute", patched_execute)
+#     def override_get_db():
+#         yield mock_db
+
+#     app.dependency_overrides[get_db] = override_get_db
+
+#     with TestClient(app) as c:
+#         yield c
+
+#     app.dependency_overrides.clear()
 
 import pytest
 from fastapi.testclient import TestClient
-
+from unittest import mock
 from src.main import app
-from src.database import get_db
+from src.database import get_db, get_engine
 
 
+# Fixture to mock the database session for unit tests
 @pytest.fixture
 def mock_db(mocker):
     """
-    Fully mocked SQLAlchemy Session.
+    Fully mocked SQLAlchemy Session to avoid actual DB access.
     """
     db = mocker.Mock(name="Session")
 
-    # explode immediately if anything touches the DB
+    # Mock the methods used for database access, these are the ones that will be used during tests
     db.execute.side_effect = AssertionError("DB access detected")
     db.commit.side_effect = AssertionError("DB access detected")
     db.refresh.side_effect = AssertionError("DB access detected")
@@ -82,19 +59,63 @@ def mock_db(mocker):
 
     return db
 
-@pytest.fixture
-def client(mock_db):
-    """
-    TestClient created ONLY after dependency override is applied.
-    """
 
+@pytest.fixture
+def mock_engine(mocker):
+    """
+    Mock the database engine to avoid actual database connections during testing.
+    """
+    mock_engine = mocker.Mock(name="Engine")
+    
+    # Mock any methods of the engine that you expect to use in the tests
+    mock_engine.connect.return_value = mock.Mock()  # Mock the `connect` method
+    
+    return mock_engine
+
+
+@pytest.fixture
+def client(mock_db, mock_engine):
+    """
+    TestClient created ONLY after dependency overrides for DB session and engine are applied.
+    """
+    # Mock the `get_db` to return the mocked session
     def override_get_db():
         yield mock_db
-
-    # 🔑 CRITICAL: override BEFORE TestClient
+    
+    # Mock the `get_engine` to return the mocked engine
+    def override_get_engine():
+        return mock_engine
+    
+    # Override both the get_db and get_engine with the mocked versions
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_engine] = override_get_engine
 
+    # Return the test client
     with TestClient(app) as c:
         yield c
 
+    # Clean up the dependency overrides after the test is completed
     app.dependency_overrides.clear()
+
+
+# Fixture to mock database engine creation
+@pytest.fixture
+def mock_engine_and_session(mocker):
+    """
+    Mock both the engine and session for testing the database operations.
+    This will ensure that no real connections are made to the database.
+    """
+    mock_engine = mocker.Mock(name="Engine")
+    mock_session = mocker.Mock(name="Session")
+
+    # Mock the engine's behavior
+    mock_engine.connect.return_value = mock.Mock()
+
+    # Mock the session's behavior
+    mock_session.query.return_value = mock.Mock()
+
+    return mock_engine, mock_session
+
+
+
+

@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from src.schemas import schemas
 
 
@@ -53,6 +53,20 @@ def mock_get_doctor_by_id(mocker):
             specialty="Cardiology",
             active=True,
             created_at=datetime(2023, 2, 2, 12, 0, 0, tzinfo=timezone.utc),
+        ),
+    )
+
+
+@pytest.fixture
+def mock_get_doctor_by_id_inactive(mocker):
+    return mocker.patch(
+        "src.main.crud.get_doctor_by_id",
+        return_value=schemas.DoctorRead(
+            doc_id=2,
+            name="Dr. Snow",
+            specialty="Radiology",
+            active=False,
+            created_at=datetime(2023, 2, 2, 13, 0, 0, tzinfo=timezone.utc),
         ),
     )
 
@@ -153,6 +167,40 @@ def test_create_appointment(client, mock_create_appointment):
         response.json()["apt_duration"]
         == mock_create_appointment.return_value.model_dump()["apt_duration"]
     )
+
+
+def test_create_appointment_in_the_past(client):
+    # Simulate the current time as a datetime in the past
+    past_time = datetime.now(timezone.utc) - timedelta(days=1)
+
+    payload = {
+        "patient_id": 1,
+        "doctor_id": 1,
+        "reason": "Consultation",
+        "apt_start": past_time.isoformat(),  # Using a time in the past
+        "apt_duration": 30,
+    }
+
+    response = client.post("/appointments", json=payload)
+    print(response.json())
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Appointments must be scheduled at a later time"
+
+
+def test_create_appointment_invalid_doctor(client, mock_get_doctor_by_id_inactive):
+    # Mock that the doctor is inactive or doesn't exist
+    payload = {
+        "patient_id": 1,
+        "doctor_id": 2,  # Non-existent or inactive doctor
+        "reason": "Consultation",
+        "apt_start": datetime(2026, 3, 2, 12, 0, 0, tzinfo=timezone.utc).isoformat(),
+        "apt_duration": 30,
+    }
+
+    response = client.post("/appointments", json=payload)
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Doctor is inactive or doesn't exist"
 
 
 def test_get_appointments(client, mock_get_appointments):
