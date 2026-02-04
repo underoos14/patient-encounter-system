@@ -15,7 +15,7 @@ def client():
 @pytest.fixture
 def mock_create_patient(mocker):
     return mocker.patch(
-        "services.crud.create_patient",
+        "src.services.crud.create_patient",
         return_value=schemas.PatientCreate(
             first_name="John",
             last_name="Doe",
@@ -28,7 +28,7 @@ def mock_create_patient(mocker):
 @pytest.fixture
 def mock_get_patient_by_id(mocker):
     return mocker.patch(
-        "services.crud.get_patient_by_id",
+        "src.services.crud.get_patient_by_id",
         return_value=schemas.PatientRead(
             pat_id=1,
             first_name="John",
@@ -44,7 +44,7 @@ def mock_get_patient_by_id(mocker):
 @pytest.fixture
 def mock_create_doctor(mocker):
     return mocker.patch(
-        "services.crud.create_doctor",
+        "src.services.crud.create_doctor",
         return_value=schemas.DoctorCreate(
             name="Dr. Smith", specialty="Cardiology", reason="Consultation", active=True
         ),
@@ -54,7 +54,7 @@ def mock_create_doctor(mocker):
 @pytest.fixture
 def mock_get_doctor_by_id(mocker):
     return mocker.patch(
-        "services.crud.get_doctor_by_id",
+        "src.services.crud.get_doctor_by_id",
         return_value=schemas.DoctorRead(
             doc_id=1,
             name="Dr. Smith",
@@ -68,7 +68,7 @@ def mock_get_doctor_by_id(mocker):
 @pytest.fixture
 def mock_get_appointments(mocker):
     return mocker.patch(
-        "services.crud.get_appointment_with_date",
+        "src.services.crud.get_appointment_with_date",
         return_value=[
             schemas.AppointmentRead(
                 apt_id=1,

@@ -3,6 +3,8 @@ from sqlalchemy import String, Integer, DateTime, Boolean, ForeignKey, Index, fu
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 
+print("Models file: ", id(Base))
+
 
 class Patient(Base):
     """

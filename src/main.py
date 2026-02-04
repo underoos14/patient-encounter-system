@@ -1,14 +1,25 @@
 from datetime import date
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 
-from database import engine, get_db
+from database import get_engine, get_db
 from models import models
 from schemas import schemas
 from services import crud
 
-models.Base.metadata.create_all(bind=engine)
-app = FastAPI(title="Patient Encounter System")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    engine = get_engine()
+    models.Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(
+    title="Patient Encounter System",
+    lifespan=lifespan,
+)
 
 
 @app.get("/")

@@ -32,7 +32,7 @@ jobs:
           black --check src/
 
       - name: Security scan
-        run: bandit -r src/patient_encounter_systemm -ll
+        run: bandit -r src -f txt -o .bandit\bandit-report.txt
 
       - name: Run tests with coverage
         run: pytest

@@ -3,23 +3,39 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from src.database import Base
+print("Test file: ", id(Base))
 
 TEST_DATABASE_URL = "sqlite+pysqlite:///:memory:"
 
 
 @pytest.fixture(scope="function")
 def db_session():
-    engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
-    Base.metadata.create_all(engine)
+    """
+    Pure SQLAlchemy unit-test session.
+    Never touches FastAPI or MySQL.
+    """
+    engine = create_engine(
+        TEST_DATABASE_URL,
+        connect_args={"check_same_thread": False},
+    )
 
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
+    Base.metadata.create_all(bind=engine)
+
+    TestingSessionLocal = sessionmaker(bind=engine)
+    session = TestingSessionLocal()
 
     try:
         yield session
     finally:
         session.close()
         Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def block_mysql():
+    import src.database
+
+    assert src.database._ENGINE is None
 
 
 @pytest.fixture
