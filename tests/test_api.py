@@ -128,6 +128,12 @@ def test_get_patient(client, mock_get_patient_by_id):
     )
 
 
+def test_get_patient_invalid(client):
+    response = client.get("patients/9999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Patient not found"
+
+
 def test_create_doctor(client, mock_create_doctor):
     payload = {
         "name": "Dr. Smith",
@@ -150,6 +156,12 @@ def test_get_doctor(client, mock_get_doctor_by_id):
         response.json()["doc_id"]
         == mock_get_doctor_by_id.return_value.model_dump()["doc_id"]
     )
+
+
+def test_get_doctor_invalid(client):
+    response = client.get("doctors/9999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Doctor not found"
 
 
 def test_create_appointment(client, mock_create_appointment):
@@ -188,10 +200,9 @@ def test_create_appointment_in_the_past(client):
 
 
 def test_create_appointment_invalid_doctor(client, mock_get_doctor_by_id_inactive):
-    # Mock that the doctor is inactive or doesn't exist
     payload = {
         "patient_id": 1,
-        "doctor_id": 2,  # Non-existent or inactive doctor
+        "doctor_id": 2,  
         "reason": "Consultation",
         "apt_start": datetime(2026, 3, 2, 12, 0, 0, tzinfo=timezone.utc).isoformat(),
         "apt_duration": 30,
