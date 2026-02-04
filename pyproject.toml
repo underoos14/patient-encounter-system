@@ -34,7 +34,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-addopts = "--cov=patient_encounter_systemm --cov-fail-under=80"
+addopts = "--cov=src --cov-fail-under=80"
 
 [tool.pylint]
 disable = ["missing-module-docstring"]
