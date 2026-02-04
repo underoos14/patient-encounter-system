@@ -92,5 +92,5 @@ class AppointmentRead(ORMBase):
     doctor_id: int
     reason: str
     apt_start: datetime
-    duration: int
+    apt_duration: int
     apt_created_at: datetime

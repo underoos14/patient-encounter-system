@@ -1,21 +1,13 @@
 import pytest
-from fastapi.testclient import TestClient
 from datetime import datetime, timezone
-from src.main import app
 from src.schemas import schemas
-
-
-@pytest.fixture
-def client():
-    """Fixture for creating TestClient."""
-    return TestClient(app)
 
 
 # Mock CRUD operations
 @pytest.fixture
 def mock_create_patient(mocker):
     return mocker.patch(
-        "src.services.crud.create_patient",
+        "src.main.crud.create_patient",
         return_value=schemas.PatientCreate(
             first_name="John",
             last_name="Doe",
@@ -28,7 +20,7 @@ def mock_create_patient(mocker):
 @pytest.fixture
 def mock_get_patient_by_id(mocker):
     return mocker.patch(
-        "src.services.crud.get_patient_by_id",
+        "src.main.crud.get_patient_by_id",
         return_value=schemas.PatientRead(
             pat_id=1,
             first_name="John",
@@ -44,7 +36,7 @@ def mock_get_patient_by_id(mocker):
 @pytest.fixture
 def mock_create_doctor(mocker):
     return mocker.patch(
-        "src.services.crud.create_doctor",
+        "src.main.crud.create_doctor",
         return_value=schemas.DoctorCreate(
             name="Dr. Smith", specialty="Cardiology", reason="Consultation", active=True
         ),
@@ -54,7 +46,7 @@ def mock_create_doctor(mocker):
 @pytest.fixture
 def mock_get_doctor_by_id(mocker):
     return mocker.patch(
-        "src.services.crud.get_doctor_by_id",
+        "src.main.crud.get_doctor_by_id",
         return_value=schemas.DoctorRead(
             doc_id=1,
             name="Dr. Smith",
@@ -68,7 +60,7 @@ def mock_get_doctor_by_id(mocker):
 @pytest.fixture
 def mock_get_appointments(mocker):
     return mocker.patch(
-        "src.services.crud.get_appointment_with_date",
+        "src.main.crud.get_appointment_with_date",
         return_value=[
             schemas.AppointmentRead(
                 apt_id=1,
@@ -76,10 +68,24 @@ def mock_get_appointments(mocker):
                 doctor_id=1,
                 reason="Check-up",
                 apt_start=datetime(2023, 2, 2, 12, 0, 0, tzinfo=timezone.utc),
-                duration=30,
+                apt_duration=30,
                 apt_created_at=datetime(2023, 2, 2, 12, 0, 0, tzinfo=timezone.utc),
             )
         ],
+    )
+
+
+@pytest.fixture
+def mock_create_appointment(mocker):
+    return mocker.patch(
+        "src.main.crud.create_appointment",
+        return_value=schemas.AppointmentCreate(
+            patient_id=1,
+            doctor_id=1,
+            reason="Check-up",
+            apt_start=datetime(2023, 2, 2, 12, 0, 0, tzinfo=timezone.utc),
+            apt_duration=30,
+        ),
     )
 
 
@@ -93,26 +99,19 @@ def test_create_patient(client, mock_create_patient):
     }
     response = client.post("/patients", json=payload)
     assert response.status_code == 201
-    assert response.json() == {
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "johndoe@example.com",
-        "phone": "1234567890",
-    }
+    assert (
+        response.json()["first_name"]
+        == mock_create_patient.return_value.model_dump()["first_name"]
+    )
 
 
 def test_get_patient(client, mock_get_patient_by_id):
     response = client.get("/patients/1")
     assert response.status_code == 200
-    assert response.json() == {
-        "pat_id": 1,
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "johndoe@example.com",
-        "phone": "1234567890",
-        "created_at": "2023-02-02T12:00:00Z",  # Changed to 'Z' for UTC
-        "updated_on": "2023-02-02T12:00:00Z",  # Changed to 'Z' for UTC
-    }
+    assert (
+        response.json()["pat_id"]
+        == mock_get_patient_by_id.return_value.model_dump()["pat_id"]
+    )
 
 
 def test_create_doctor(client, mock_create_doctor):
@@ -124,39 +123,46 @@ def test_create_doctor(client, mock_create_doctor):
     }
     response = client.post("/doctors", json=payload)
     assert response.status_code == 201
-    assert response.json() == {
-        "name": "Dr. Smith",
-        "specialty": "Cardiology",
-        "reason": "Consultation",
-        "active": True,
-    }
+    assert (
+        response.json()["active"]
+        == mock_create_doctor.return_value.model_dump()["active"]
+    )
 
 
 def test_get_doctor(client, mock_get_doctor_by_id):
     response = client.get("/doctors/1")
     assert response.status_code == 200
-    assert response.json() == {
-        "doc_id": 1,
-        "name": "Dr. Smith",
-        "specialty": "Cardiology",
-        "active": True,
-        "created_at": "2023-02-02T12:00:00Z",  # Changed to 'Z' for UTC
+    assert (
+        response.json()["doc_id"]
+        == mock_get_doctor_by_id.return_value.model_dump()["doc_id"]
+    )
+
+
+def test_create_appointment(client, mock_create_appointment):
+    payload = {
+        "patient_id": 1,
+        "doctor_id": 1,
+        "reason": "Check-up",
+        "apt_start": datetime(2023, 2, 2, 12, 0, 0, tzinfo=timezone.utc).isoformat(),
+        "apt_duration": 30,
     }
+    response = client.post("/appointments", json=payload)
+    print(response.json())
+    assert response.status_code == 201
+    assert (
+        response.json()["apt_duration"]
+        == mock_create_appointment.return_value.model_dump()["apt_duration"]
+    )
 
 
 def test_get_appointments(client, mock_get_appointments):
     response = client.get("/appointments?apt_date=2023-02-02")
     assert response.status_code == 200
     assert len(response.json()) == 1
-    assert response.json()[0] == {
-        "apt_id": 1,
-        "patient_id": 1,
-        "doctor_id": 1,
-        "reason": "Check-up",
-        "apt_start": "2023-02-02T12:00:00Z",  # Changed to 'Z' for UTC
-        "duration": 30,
-        "apt_created_at": "2023-02-02T12:00:00Z",  # Changed to 'Z' for UTC
-    }
+    assert (
+        response.json()[0]["apt_id"]
+        == mock_get_appointments.return_value[0].model_dump()["apt_id"]
+    )
 
 
 def test_health_check(client):

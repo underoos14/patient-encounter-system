@@ -34,7 +34,7 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
     return crud.get_patient_by_id(db, patient_id)
 
 
-@app.post("/patients", response_model=schemas.PatientCreate, status_code=201)
+@app.post("/patients", status_code=201)
 def create_patient(payload: schemas.PatientCreate, db: Session = Depends(get_db)):
     """API Endpoint to create a patient profile in database"""
     return crud.create_patient(db, payload)
@@ -46,7 +46,7 @@ def get_doctor(doctor_id: int, db: Session = Depends(get_db)):
     return crud.get_doctor_by_id(db, doctor_id)
 
 
-@app.post("/doctors", response_model=schemas.DoctorCreate, status_code=201)
+@app.post("/doctors", status_code=201)
 def create_doctor(payload: schemas.DoctorCreate, db: Session = Depends(get_db)):
     """API Endpoint to create doctor profile in database"""
     return crud.create_doctor(db, payload)
@@ -58,6 +58,14 @@ def get_appointments(
 ):
     """API endpoint to get appointment for a specific date, optionally with doctor id"""
     return crud.get_appointment_with_date(db=db, apt_date=apt_date, doctor_id=doctor_id)
+
+
+@app.post("/appointments", status_code=201)
+def create_appointment(
+    payload: schemas.AppointmentCreate, db: Session = Depends(get_db)
+):
+    """API endpoint to create an appointment"""
+    return crud.create_appointment(db, payload)
 
 
 @app.get("/health")
