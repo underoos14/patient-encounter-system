@@ -6,5 +6,5 @@ This is a project for the backend of a patient appointment system.
 
 ```cmd
 cd src
-uvicorn patients_encounter_systemm.main:app --reload
+uvicorn main:app --reload
 ```
