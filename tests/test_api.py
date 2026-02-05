@@ -119,6 +119,17 @@ def test_create_patient(client, mock_create_patient):
     )
 
 
+def test_create_patient_invalid(client):
+    payload = {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "johndoeexample.com",
+        "phone": "1234567890",
+    }
+    response = client.post("/patients", json=payload)
+    assert response.status_code == 422
+
+
 def test_get_patient(client, mock_get_patient_by_id):
     response = client.get("/patients/1")
     assert response.status_code == 200
@@ -147,6 +158,17 @@ def test_create_doctor(client, mock_create_doctor):
         response.json()["active"]
         == mock_create_doctor.return_value.model_dump()["active"]
     )
+
+
+def test_create_doctor_invalid(client):
+    payload = {
+        "name": "",
+        "specialty": "Cardiology",
+        "reason": "Consultation",
+        "active": True,
+    }
+    response = client.post("/patients", json=payload)
+    assert response.status_code == 422
 
 
 def test_get_doctor(client, mock_get_doctor_by_id):
@@ -202,7 +224,7 @@ def test_create_appointment_in_the_past(client):
 def test_create_appointment_invalid_doctor(client, mock_get_doctor_by_id_inactive):
     payload = {
         "patient_id": 1,
-        "doctor_id": 2,  
+        "doctor_id": 2,
         "reason": "Consultation",
         "apt_start": datetime(2026, 3, 2, 12, 0, 0, tzinfo=timezone.utc).isoformat(),
         "apt_duration": 30,

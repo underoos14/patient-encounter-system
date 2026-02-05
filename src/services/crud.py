@@ -49,7 +49,7 @@ def create_patient(db: Session, payload: schemas.PatientCreate) -> models.Patien
 
         return patient
     except Exception:
-        raise HTTPException(status_code=400, detail="wrong patient fields")
+        raise HTTPException(status_code=422, detail="wrong patient fields")
 
 
 def create_doctor(db: Session, payload: schemas.DoctorCreate) -> models.Doctor:
@@ -61,7 +61,7 @@ def create_doctor(db: Session, payload: schemas.DoctorCreate) -> models.Doctor:
         db.refresh(doctor)
         return doctor
     except Exception:
-        raise HTTPException(status_code=400, detail="wrong doctor fields")
+        raise HTTPException(status_code=422, detail="wrong doctor fields")
 
 
 def create_appointment(
